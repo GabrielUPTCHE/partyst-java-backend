@@ -25,10 +25,11 @@ public class UserService {
         User findedUser = userRepository.findByEmail(request.email()).orElseThrow(null);
         findedUser.setName(request.name());
         findedUser.setLastname(request.lastname());
-        findedUser.setCellphone(request.celphone());
+        findedUser.setCellphone(request.cellphone());
         User user = null;
+        System.out.println("el finded " + findedUser);
         if (findedUser != null) {
-            user = userRepository.save(null);
+            user = userRepository.save(findedUser);
         }
         return new EditUserResponse(user.getName(), user.getLastname(), user.getName(), user.getCellphone(), user.getEmail());
     }

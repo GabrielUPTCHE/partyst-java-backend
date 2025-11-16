@@ -35,7 +35,7 @@ public class UserController {
     @PostMapping("/editUser")
     public ResponseEntity<GenericResponse> postMethodName(@RequestBody EditUserRequest entity) {
         EditUserResponse updatedUser = userService.updateUser(entity);
-        return ResponseEntity.ok(new GenericResponse<EditUserResponse>(201, "Usuario creado", updatedUser));
+        return ResponseEntity.ok(new GenericResponse<EditUserResponse>(201, "Usuario editado", updatedUser));
     }
     
 }
