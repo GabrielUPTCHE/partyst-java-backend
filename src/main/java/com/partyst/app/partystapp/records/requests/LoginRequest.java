@@ -1,4 +1,4 @@
-package com.partyst.app.partystapp.auth.controller;
+package com.partyst.app.partystapp.records.requests;
 
 public record LoginRequest(
     String email,

@@ -1,4 +1,4 @@
-package com.partyst.app.partystapp.auth.controller;
+package com.partyst.app.partystapp.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.partyst.app.partystapp.auth.service.AuthService;
+import com.partyst.app.partystapp.records.requests.LoginRequest;
+import com.partyst.app.partystapp.records.requests.RegisterRequest;
+import com.partyst.app.partystapp.records.responses.TokenResponse;
 
 import io.micrometer.core.ipc.http.HttpSender.Response;
 import lombok.RequiredArgsConstructor;

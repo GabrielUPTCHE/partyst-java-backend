@@ -1,4 +1,4 @@
-package com.partyst.app.partystapp.auth.controller;
+package com.partyst.app.partystapp.records.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
