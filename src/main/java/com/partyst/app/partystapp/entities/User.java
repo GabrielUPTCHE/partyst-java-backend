@@ -35,8 +35,8 @@ public class User {
 
     @Column(unique = true)
     private String email;
-    private String celphone;
-    private LocalDate birthdate;
+    private String cellphone;
+    private String nickname;
     private String password;
 
     @ManyToMany

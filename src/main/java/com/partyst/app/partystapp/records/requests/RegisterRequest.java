@@ -8,7 +8,7 @@ public record RegisterRequest(
     String name,
     String lastname,
     String celphone,
-    LocalDate birthdate
+    String nickname
 ) {
 
 }

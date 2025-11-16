@@ -41,8 +41,8 @@ public class AuthService {
             .email(request.email())
             .password(passwordEncoder.encode(request.password()))
             .lastname(request.lastname())
-            .birthdate(request.birthdate())
-            .celphone(request.celphone())
+            .nickname(request.nickname())
+            .cellphone(request.celphone())
             .build();
         User savedUser = userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
