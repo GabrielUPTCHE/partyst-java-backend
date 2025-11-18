@@ -50,13 +50,13 @@ public class AuthController {
         return  ResponseEntity.ok(new GenericResponse<TokenResponse>(200, "Refresco exitoso", refreshResponse));
     }
 
-    @GetMapping("/forgetPassword")
+   /*  @GetMapping("/forgetPassword")
     public ResponseEntity<GenericResponse> forgetPassword(){
         ForgetPasswordResponse forgetPasswordResponse = new ForgetPasswordResponse(true);
         //terminarrr
         return ResponseEntity.ok(new GenericResponse<ForgetPasswordResponse>(201, "Se envio correo para cambiar la contraseña", forgetPasswordResponse));
     }
-    
+     */
     
 
 }

@@ -1,7 +1,10 @@
 package com.partyst.app.partystapp.entities;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,9 +18,12 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -48,8 +54,17 @@ public class User {
     )
     private List<Role> roles;
 
+    @ManyToMany(mappedBy = "users")
+    @JsonIgnore
+    private Set<Project> projects;
 
+    @ManyToMany
+    @JoinTable(
+        name = "skills_user",
+        schema = "partyst_plastic",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "skill_id")
+    )
+    private Set<Skill> skills;
 
-   /*  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Token> tokens; */
 }
