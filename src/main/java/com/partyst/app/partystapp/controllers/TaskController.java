@@ -5,13 +5,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.partyst.app.partystapp.entities.Task;
 import com.partyst.app.partystapp.records.GenericResponse;
+import com.partyst.app.partystapp.records.requests.CreateTaskRequest;
+import com.partyst.app.partystapp.records.requests.DeleteTaskRequest;
 import com.partyst.app.partystapp.records.requests.TaskByUserProjectRequest;
+import com.partyst.app.partystapp.records.requests.UpdateTaskRequest;
+import com.partyst.app.partystapp.records.responses.CreateProjectResponse;
 import com.partyst.app.partystapp.services.TaskService;
+
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 @RestController
@@ -24,8 +34,30 @@ public class TaskController {
     @PostMapping("/byUserProject")
     public ResponseEntity<GenericResponse> byUserProject( @RequestBody TaskByUserProjectRequest entity) {
         Task taskFinded = taskService.getTaskByProjectidTaskId( entity.taskId());
-        return ResponseEntity.ok(new GenericResponse<Task>(201, "Proyecto actualizado", taskFinded));
+        return ResponseEntity.ok(new GenericResponse<Task>(201, "Tareas encontradas", taskFinded));
     }
     
+    @PostMapping("/AllbyUserProject")
+    public ResponseEntity<GenericResponse> byUserProjectTwo( @RequestBody TaskByUserProjectRequest entity) {
+        List<Task> taskFinded = taskService.getTasksByProjectidTaskId( entity.taskId(), entity.projectId());
+        return ResponseEntity.ok(new GenericResponse<List<Task>>(201, "Tareas encontradas", taskFinded));
+    }
+    @PostMapping("/create")
+    public ResponseEntity<GenericResponse> createTask( @RequestBody CreateTaskRequest entity) {
+        CreateProjectResponse resultCreated = taskService.createTask( entity);
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(201, "Tarea creada", resultCreated));
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<GenericResponse>  uptadeTask(@RequestBody UpdateTaskRequest entity) {
+        CreateProjectResponse resultUpdated = taskService.updateTask( entity);
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(201, "Tarea editada", resultUpdated));
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<GenericResponse> deleteTask(@RequestBody DeleteTaskRequest request){
+         CreateProjectResponse resultDeleted = taskService.deleteTask( request);
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(201, "Tarea editada", resultDeleted));
+    }
 
 }

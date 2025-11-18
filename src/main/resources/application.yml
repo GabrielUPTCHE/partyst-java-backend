@@ -15,6 +15,9 @@ spring:
       hibernate:
         format_sql: true
     show-sql: true
+  jdbc:
+    template:
+      fetch-size: 500
 
   output:
     ansi:
