@@ -4,15 +4,20 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.partyst.app.partystapp.entities.Project;
 
+import jakarta.transaction.Transactional;
+
 @Repository
 public interface ProjectsRepository  extends JpaRepository<Project, Integer>, JpaSpecificationExecutor<Project>{
 
     List<Project> findAllByUsersUserId(Integer userId);
+
+    List<Project> findAllByProjectId(Integer projectId);
 
     @Query("""
         SELECT p
@@ -22,6 +27,7 @@ public interface ProjectsRepository  extends JpaRepository<Project, Integer>, Jp
         LEFT JOIN p.users
     """)
     List<Project> findAllWithFullData();
+
 
 
 }

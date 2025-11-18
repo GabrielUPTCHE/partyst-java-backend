@@ -50,7 +50,7 @@ public class Project {
     @JsonIgnore
     private Set<Category> projectsCategory;
 
-   @ManyToMany(mappedBy = "projects")
+   @ManyToMany(mappedBy = "projects", cascade = CascadeType.REMOVE)
     @JsonIgnore
     private Set<Category> categories;
 
