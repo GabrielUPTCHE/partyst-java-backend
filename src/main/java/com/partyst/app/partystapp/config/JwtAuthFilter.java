@@ -125,9 +125,9 @@ public class JwtAuthFilter extends OncePerRequestFilter{
             
             filterChain.doFilter(request, response);
             
-        } catch (Exception e) {
-            logger.error("Error during JWT authentication", e);
-            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Authentication error");
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+            logger.error("Error during JWT authentication: {}", e.getMessage());
+            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token: " + e.getMessage());
         }
     }
 

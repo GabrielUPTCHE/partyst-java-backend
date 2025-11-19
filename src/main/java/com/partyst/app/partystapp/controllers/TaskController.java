@@ -9,7 +9,9 @@ import com.partyst.app.partystapp.records.requests.CreateTaskRequest;
 import com.partyst.app.partystapp.records.requests.DeleteTaskRequest;
 import com.partyst.app.partystapp.records.requests.TaskByUserProjectRequest;
 import com.partyst.app.partystapp.records.requests.UpdateTaskRequest;
+import com.partyst.app.partystapp.records.requests.UpdateTaskStateRequest;
 import com.partyst.app.partystapp.records.responses.CreateProjectResponse;
+import com.partyst.app.partystapp.records.responses.TaskResponse;
 import com.partyst.app.partystapp.services.TaskService;
 
 import java.util.List;
@@ -43,21 +45,31 @@ public class TaskController {
         return ResponseEntity.ok(new GenericResponse<List<Task>>(201, "Tareas encontradas", taskFinded));
     }*/
     @PostMapping("/create")
-    public ResponseEntity<GenericResponse> createTask( @RequestBody CreateTaskRequest entity) {
-        CreateProjectResponse resultCreated = taskService.createTask( entity);
-        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(201, "Tarea creada", resultCreated));
+    public ResponseEntity<GenericResponse> createTask(@RequestBody CreateTaskRequest entity) {
+        System.out.println("🎯 [CONTROLLER] POST /task/create");
+        TaskResponse resultCreated = taskService.createTask(entity);
+        return ResponseEntity.ok(new GenericResponse<TaskResponse>(201, "Tarea creada", resultCreated));
     }
 
     @PutMapping("/update")
-    public ResponseEntity<GenericResponse>  uptadeTask(@RequestBody UpdateTaskRequest entity) {
-        CreateProjectResponse resultUpdated = taskService.updateTask( entity);
-        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(201, "Tarea editada", resultUpdated));
+    public ResponseEntity<GenericResponse> uptadeTask(@RequestBody UpdateTaskRequest entity) {
+        System.out.println("🎯 [CONTROLLER] PUT /task/update");
+        TaskResponse resultUpdated = taskService.updateTask(entity);
+        return ResponseEntity.ok(new GenericResponse<TaskResponse>(200, "Tarea actualizada", resultUpdated));
+    }
+
+    @PutMapping("/state")
+    public ResponseEntity<GenericResponse> updateTaskState(@RequestBody UpdateTaskStateRequest request) {
+        System.out.println("🎯 [CONTROLLER] PUT /task/state");
+        TaskResponse resultUpdated = taskService.updateTaskState(request);
+        return ResponseEntity.ok(new GenericResponse<TaskResponse>(200, "Estado actualizado", resultUpdated));
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<GenericResponse> deleteTask(@RequestBody DeleteTaskRequest request){
-         CreateProjectResponse resultDeleted = taskService.deleteTask( request);
-        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(201, "Tarea editada", resultDeleted));
+        System.out.println("🎯 [CONTROLLER] DELETE /task/delete - taskId: " + request.taskId());
+        CreateProjectResponse resultDeleted = taskService.deleteTask(request);
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(200, "Tarea eliminada", resultDeleted));
     }
 
 }

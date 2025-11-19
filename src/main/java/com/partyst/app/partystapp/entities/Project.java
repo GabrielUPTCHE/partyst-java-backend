@@ -38,7 +38,7 @@ public class Project {
     @Builder.Default
     private Boolean active = true;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "colaborations",
             schema = "partyst_plastic",
@@ -52,7 +52,7 @@ public class Project {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "project_skills",
         schema = "partyst_plastic",

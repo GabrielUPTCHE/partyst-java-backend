@@ -1,11 +1,17 @@
 package com.partyst.app.partystapp.records.requests;
 
 import java.util.List;
-import java.util.Set;
 
-import com.partyst.app.partystapp.entities.Skill;
-import com.partyst.app.partystapp.entities.Task;
+import com.partyst.app.partystapp.records.dtos.SkillIdDTO;
+import com.partyst.app.partystapp.records.dtos.TaskCreateDTO;
 
-public record CreateProjectRequest(String title, Integer categoryId, String description, Integer userId, Set<Skill> skills, List<Task> tasks) {
+public record CreateProjectRequest(
+    String title, 
+    Integer categoryId, 
+    String description, 
+    Integer userId, 
+    List<SkillIdDTO> skills, 
+    List<TaskCreateDTO> tasks
+) {
 
 }

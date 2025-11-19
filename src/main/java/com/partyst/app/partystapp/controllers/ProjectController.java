@@ -98,9 +98,10 @@ public class ProjectController {
     }
     
     @DeleteMapping("/{projectId}/delete")
-    public ResponseEntity<GenericResponse> deleteeProject(@PathVariable Integer projectId ) {
+    public ResponseEntity<GenericResponse> deleteeProject(@PathVariable Integer projectId) {
+        System.out.println("🎯 [CONTROLLER] DELETE /projects/" + projectId + "/delete");
         CreateProjectResponse findedProjects = projectService.deleteProject(projectId);
-        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(201, "Proyecto eliminado", findedProjects));
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(200, "Proyecto eliminado", findedProjects));
     }
     
     
