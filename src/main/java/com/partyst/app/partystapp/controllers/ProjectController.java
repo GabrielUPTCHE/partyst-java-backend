@@ -5,13 +5,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.partyst.app.partystapp.entities.Project;
 import com.partyst.app.partystapp.records.GenericResponse;
+import com.partyst.app.partystapp.records.requests.AcceptRequestRequest;
 import com.partyst.app.partystapp.records.requests.CreateProjectRequest;
 import com.partyst.app.partystapp.records.requests.FilterProjectRequest;
+import com.partyst.app.partystapp.records.requests.JoinProjectRequest;
+import com.partyst.app.partystapp.records.requests.RejectRequestRequest;
+import com.partyst.app.partystapp.records.requests.RemoveMemberRequest;
 import com.partyst.app.partystapp.records.requests.UpdateProjectRequest;
 import com.partyst.app.partystapp.records.responses.CreateProjectResponse;
 import com.partyst.app.partystapp.records.responses.ProjectBasicResponse;
 import com.partyst.app.partystapp.records.responses.ProjectListWrapperResponse;
+import com.partyst.app.partystapp.records.responses.ProjectMembersResponse;
+import com.partyst.app.partystapp.records.responses.ProjectRequestsResponse;
 import com.partyst.app.partystapp.records.responses.ProjectResponse;
+import com.partyst.app.partystapp.services.ProjectMembershipService;
 import com.partyst.app.partystapp.services.ProjectService;
 
 import java.util.ArrayList;
@@ -36,6 +43,9 @@ public class ProjectController {
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private ProjectMembershipService membershipService;
 
     @PostMapping("/update")
     public ResponseEntity<GenericResponse> projectUpdate( @RequestBody UpdateProjectRequest entity) {
@@ -103,9 +113,81 @@ public class ProjectController {
         CreateProjectResponse findedProjects = projectService.deleteProject(projectId);
         return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(200, "Proyecto eliminado", findedProjects));
     }
-    
-    
-    
-    
+
+    // ==================== PROJECT MEMBERSHIP ENDPOINTS ====================
+
+    /**
+     * Solicitar unirse a un proyecto
+     * POST /projects/join
+     */
+    @PostMapping("/join")
+    public ResponseEntity<GenericResponse<CreateProjectResponse>> joinProject(@RequestBody JoinProjectRequest request) {
+        System.out.println("🎯 [CONTROLLER] POST /projects/join - Usuario: " + request.userId() + 
+                          ", Proyecto: " + request.projectId());
+        CreateProjectResponse result = membershipService.joinProject(request);
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(
+            result.succes() ? 200 : 400, 
+            result.message(), 
+            result
+        ));
+    }
+
+    /**
+     * Obtener solicitudes pendientes de un proyecto
+     * GET /projects/{projectId}/requests
+     */
+    @GetMapping("/{projectId}/requests")
+    public ResponseEntity<GenericResponse<ProjectRequestsResponse>> getProjectRequests(@PathVariable Integer projectId) {
+        System.out.println("🎯 [CONTROLLER] GET /projects/" + projectId + "/requests");
+        ProjectRequestsResponse result = membershipService.getProjectRequests(projectId);
+        return ResponseEntity.ok(new GenericResponse<ProjectRequestsResponse>(200, result.message(), result));
+    }
+
+    /**
+     * Aceptar solicitud de un usuario
+     * POST /projects/requests/accept
+     */
+    @PostMapping("/requests/accept")
+    public ResponseEntity<GenericResponse<CreateProjectResponse>> acceptRequest(@RequestBody AcceptRequestRequest request) {
+        System.out.println("🎯 [CONTROLLER] POST /projects/requests/accept - Proyecto: " + 
+                          request.projectid() + ", Usuario: " + request.userid());
+        CreateProjectResponse result = membershipService.acceptRequest(request);
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(200, result.message(), result));
+    }
+
+    /**
+     * Rechazar solicitud de un usuario
+     * POST /projects/requests/decline
+     */
+    @PostMapping("/requests/decline")
+    public ResponseEntity<GenericResponse<CreateProjectResponse>> rejectRequest(@RequestBody RejectRequestRequest request) {
+        System.out.println("🎯 [CONTROLLER] POST /projects/requests/decline - Proyecto: " + 
+                          request.projectid() + ", Usuario: " + request.userid());
+        CreateProjectResponse result = membershipService.rejectRequest(request);
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(200, result.message(), result));
+    }
+
+    /**
+     * Obtener miembros de un proyecto
+     * GET /projects/{projectId}/members
+     */
+    @GetMapping("/{projectId}/members")
+    public ResponseEntity<GenericResponse<ProjectMembersResponse>> getProjectMembers(@PathVariable Integer projectId) {
+        System.out.println("🎯 [CONTROLLER] GET /projects/" + projectId + "/members");
+        ProjectMembersResponse result = membershipService.getProjectMembers(projectId);
+        return ResponseEntity.ok(new GenericResponse<ProjectMembersResponse>(200, result.message(), result));
+    }
+
+    /**
+     * Eliminar miembro de un proyecto
+     * DELETE /projects/member
+     */
+    @DeleteMapping("/member")
+    public ResponseEntity<GenericResponse<CreateProjectResponse>> removeMember(@RequestBody RemoveMemberRequest request) {
+        System.out.println("🎯 [CONTROLLER] DELETE /projects/member - Proyecto: " + 
+                          request.projectid() + ", Usuario: " + request.userid());
+        CreateProjectResponse result = membershipService.removeMember(request);
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(200, result.message(), result));
+    }
 
 }
