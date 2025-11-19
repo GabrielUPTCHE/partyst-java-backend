@@ -13,7 +13,6 @@ import com.partyst.app.partystapp.records.requests.RejectRequestRequest;
 import com.partyst.app.partystapp.records.requests.RemoveMemberRequest;
 import com.partyst.app.partystapp.records.requests.UpdateProjectRequest;
 import com.partyst.app.partystapp.records.responses.CreateProjectResponse;
-import com.partyst.app.partystapp.records.responses.JoinProjectResponse;
 import com.partyst.app.partystapp.records.responses.ProjectBasicResponse;
 import com.partyst.app.partystapp.records.responses.ProjectListWrapperResponse;
 import com.partyst.app.partystapp.records.responses.ProjectMembersResponse;
@@ -122,27 +121,15 @@ public class ProjectController {
      * POST /projects/join
      */
     @PostMapping("/join")
-    public ResponseEntity<GenericResponse<JoinProjectResponse>> joinProject(@RequestBody JoinProjectRequest request) {
-        try {
-            System.out.println("🎯 [CONTROLLER] POST /projects/join - Usuario: " + request.userId() + 
-                              ", Proyecto: " + request.projectId());
-            
-            JoinProjectResponse result = membershipService.joinProject(request);
-            
-            HttpStatus status = HttpStatus.valueOf(result.code());
-            
-            return ResponseEntity.status(status)
-                .body(new GenericResponse<JoinProjectResponse>(
-                    result.code(), 
-                    result.message(), 
-                    result
-                ));
-                
-        } catch (Exception e) {
-            System.err.println("❌ [CONTROLLER ERROR] " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new GenericResponse<>(500, "Error interno del servidor", null));
-        }
+    public ResponseEntity<GenericResponse<CreateProjectResponse>> joinProject(@RequestBody JoinProjectRequest request) {
+        System.out.println("🎯 [CONTROLLER] POST /projects/join - Usuario: " + request.userId() + 
+                          ", Proyecto: " + request.projectId());
+        CreateProjectResponse result = membershipService.joinProject(request);
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(
+            result.succes() ? 200 : 400, 
+            result.message(), 
+            result
+        ));
     }
 
     /**

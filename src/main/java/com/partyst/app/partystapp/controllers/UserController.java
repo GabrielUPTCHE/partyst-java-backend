@@ -6,7 +6,6 @@ import com.partyst.app.partystapp.entities.User;
 import com.partyst.app.partystapp.records.GenericResponse;
 import com.partyst.app.partystapp.records.requests.EditUserRequest;
 import com.partyst.app.partystapp.records.responses.CreateProjectResponse;
-import com.partyst.app.partystapp.records.responses.DeleteUserResponse;
 import com.partyst.app.partystapp.records.responses.EditUserResponse;
 import com.partyst.app.partystapp.records.responses.UserByIdResponse;
 import com.partyst.app.partystapp.services.UserService;
@@ -54,9 +53,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}/delete")
-    public ResponseEntity<DeleteUserResponse> deleteUser(@PathVariable Long userId){
-        DeleteUserResponse deletedUser = userService.deleteUser(userId);
-        return ResponseEntity.ok(deletedUser);
+    public ResponseEntity<GenericResponse> deleteUser(@PathVariable Long userId){
+        CreateProjectResponse deletedUser = userService.deleteUser(userId);
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(201, "Usuario eliminado", deletedUser));
     }
     
 }

@@ -26,29 +26,14 @@ public class ProjectRequest {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(columnDefinition = "TEXT")
-    private String message;
-
-    @Column(nullable = false)
-    private String status; // "pending", "accepted", "rejected"
-
-    @Column(name = "created_at")
+    @Column(name = "request_date", nullable = false)
     @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime requestDate = LocalDateTime.now();
 
-    @Column(name = "request_date")
-    private LocalDateTime requestDate;
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "pending"; // pending, accepted, rejected
 
-    @PrePersist
-    protected void onCreate() {
-        if (requestDate == null) {
-            requestDate = LocalDateTime.now();
-        }
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-        if (requestDate == null) {
-            requestDate = LocalDateTime.now();
-        }
-    }
+    @Column(name = "message", length = 500)
+    private String message;
 }

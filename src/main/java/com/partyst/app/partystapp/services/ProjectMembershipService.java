@@ -8,7 +8,6 @@ import com.partyst.app.partystapp.records.requests.JoinProjectRequest;
 import com.partyst.app.partystapp.records.requests.RejectRequestRequest;
 import com.partyst.app.partystapp.records.requests.RemoveMemberRequest;
 import com.partyst.app.partystapp.records.responses.CreateProjectResponse;
-import com.partyst.app.partystapp.records.responses.JoinProjectResponse;
 import com.partyst.app.partystapp.records.responses.ProjectMembersResponse;
 import com.partyst.app.partystapp.records.responses.ProjectRequestsResponse;
 import com.partyst.app.partystapp.repositories.ProjectsRepository;
@@ -20,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
@@ -44,64 +42,47 @@ public class ProjectMembershipService {
     /**
      * Solicitar unirse a un proyecto
      */
-    public JoinProjectResponse joinProject(JoinProjectRequest request) {
-        try {
-            logger.info("🔔 [JOIN REQUEST] Usuario {} solicitando unirse al proyecto {}", 
-                request.userId(), request.projectId());
+    @Transactional
+    public CreateProjectResponse joinProject(JoinProjectRequest request) {
+        logger.info("🔔 [JOIN REQUEST] Usuario {} solicitando unirse al proyecto {}", 
+            request.userId(), request.projectId());
 
-            // Validar que el proyecto existe
-            Project project = projectsRepository.findById(request.projectId())
-                .orElseThrow(() -> {
-                    logger.error("❌ Proyecto no encontrado: {}", request.projectId());
-                    return new IllegalArgumentException("Proyecto no encontrado");
-                });
+        Project project = projectsRepository.findById(request.projectId())
+            .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con ID: " + request.projectId()));
 
-            // Validar que el usuario existe
-            User user = userRepository.findById(request.userId().longValue())
-                .orElseThrow(() -> {
-                    logger.error("❌ Usuario no encontrado: {}", request.userId());
-                    return new IllegalArgumentException("Usuario no encontrado");
-                });
+        User user = userRepository.findById(Long.valueOf(request.userId()))
+            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + request.userId()));
 
-            // Verificar si el usuario ya es miembro
-            if (project.getUsers() != null && project.getUsers().contains(user)) {
-                logger.warn("⚠️ Usuario {} ya es miembro del proyecto {}", user.getEmail(), project.getName());
-                return new JoinProjectResponse(301, "Ya eres miembro de este proyecto");
-            }
-
-            // Verificar si ya existe una solicitud pendiente
-            boolean existsPendingRequest = projectRequestRepository
-                .existsByProjectAndUserAndStatus(project, user, "pending");
-
-            if (existsPendingRequest) {
-                logger.warn("⚠️ Ya existe una solicitud pendiente para usuario {} en proyecto {}", 
-                    user.getEmail(), project.getName());
-                return new JoinProjectResponse(301, "Ya tienes una solicitud pendiente para este proyecto");
-            }
-
-            // Crear la solicitud
-            ProjectRequest projectRequest = ProjectRequest.builder()
-                .project(project)
-                .user(user)
-                .message(request.message() != null ? request.message() : "Solicitud para unirse al proyecto")
-                .status("pending")
-                .createdAt(LocalDateTime.now())
-                .build();
-
-            projectRequestRepository.save(projectRequest);
-            
-            logger.info("✅ Solicitud creada exitosamente para usuario {} en proyecto {}", 
-                user.getEmail(), project.getName());
-
-            return new JoinProjectResponse(201, "Solicitud enviada exitosamente");
-
-        } catch (IllegalArgumentException e) {
-            logger.error("❌ Error de validación: {}", e.getMessage());
-            return new JoinProjectResponse(301, e.getMessage());
-        } catch (Exception e) {
-            logger.error("❌ Error inesperado al unirse al proyecto: {}", e.getMessage(), e);
-            return new JoinProjectResponse(500, "Error interno del servidor");
+        // Verificar si el usuario ya es miembro
+        if (project.getUsers() != null && project.getUsers().contains(user)) {
+            logger.warn("⚠️ Usuario {} ya es miembro del proyecto {}", user.getEmail(), project.getName());
+            return new CreateProjectResponse(false, "Ya eres miembro de este proyecto");
         }
+
+        // Verificar si ya existe una solicitud pendiente
+        boolean existsPendingRequest = projectRequestRepository
+            .existsByProjectAndUserAndStatus(project, user, "pending");
+
+        if (existsPendingRequest) {
+            logger.warn("⚠️ Ya existe una solicitud pendiente para usuario {} en proyecto {}", 
+                user.getEmail(), project.getName());
+            return new CreateProjectResponse(false, "Ya tienes una solicitud pendiente para este proyecto");
+        }
+
+        // Crear la solicitud
+        ProjectRequest projectRequest = ProjectRequest.builder()
+            .project(project)
+            .user(user)
+            .message(request.message())
+            .status("pending")
+            .build();
+
+        projectRequestRepository.save(projectRequest);
+        
+        logger.info("✅ Solicitud creada exitosamente para usuario {} en proyecto {}", 
+            user.getEmail(), project.getName());
+
+        return new CreateProjectResponse(true, "Solicitud enviada exitosamente");
     }
 
     /**
