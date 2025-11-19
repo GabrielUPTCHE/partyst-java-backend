@@ -36,12 +36,12 @@ public class TaskController {
         Task taskFinded = taskService.getTaskByProjectidTaskId( entity.taskId());
         return ResponseEntity.ok(new GenericResponse<Task>(201, "Tareas encontradas", taskFinded));
     }
-    
+    /*
     @PostMapping("/AllbyUserProject")
     public ResponseEntity<GenericResponse> byUserProjectTwo( @RequestBody TaskByUserProjectRequest entity) {
         List<Task> taskFinded = taskService.getTasksByProjectidTaskId( entity.taskId(), entity.projectId());
         return ResponseEntity.ok(new GenericResponse<List<Task>>(201, "Tareas encontradas", taskFinded));
-    }
+    }*/
     @PostMapping("/create")
     public ResponseEntity<GenericResponse> createTask( @RequestBody CreateTaskRequest entity) {
         CreateProjectResponse resultCreated = taskService.createTask( entity);

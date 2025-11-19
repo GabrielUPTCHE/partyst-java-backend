@@ -33,10 +33,10 @@ public class TaskService {
         return taskFinded;
     }
     
-    public List<Task> getTasksByProjectidTaskId(Integer taskId, Integer projectId){
+    /*public List<Task> getTasksByProjectidTaskId(Integer taskId, Integer projectId){
         List<Task> taskFinded = taskRepositoryTwo.findTasks( taskId, projectId);
         return taskFinded;
-    }
+    }*/
 
     public CreateProjectResponse  createTask(CreateTaskRequest request) {
         User user = userRepository.findByEmail(request.email()).orElse(null);

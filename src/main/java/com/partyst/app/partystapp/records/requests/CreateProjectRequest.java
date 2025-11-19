@@ -6,6 +6,6 @@ import java.util.Set;
 import com.partyst.app.partystapp.entities.Skill;
 import com.partyst.app.partystapp.entities.Task;
 
-public record CreateProjectRequest(String title, String category, Integer userId, Set<Skill> skills, List<Task> tasks) {
+public record CreateProjectRequest(String title, Integer categoryId, String description, Integer userId, Set<Skill> skills, List<Task> tasks) {
 
 }

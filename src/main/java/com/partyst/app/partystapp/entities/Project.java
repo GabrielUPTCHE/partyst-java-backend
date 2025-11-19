@@ -34,7 +34,9 @@ public class Project {
     @Column(name="user_creator_id")
     private Integer userCreatorId;
     
-    private Boolean active;
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    @Builder.Default
+    private Boolean active = true;
 
     @ManyToMany
     @JoinTable(
@@ -46,13 +48,9 @@ public class Project {
     @JsonIgnore
     private Set<User> users;
 
-   @ManyToMany(mappedBy = "projects")
-    @JsonIgnore
-    private Set<Category> projectsCategory;
-
-   @ManyToMany(mappedBy = "projects", cascade = CascadeType.REMOVE)
-    @JsonIgnore
-    private Set<Category> categories;
+   @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @ManyToMany
     @JoinTable(

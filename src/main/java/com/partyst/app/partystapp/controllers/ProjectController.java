@@ -9,12 +9,16 @@ import com.partyst.app.partystapp.records.requests.CreateProjectRequest;
 import com.partyst.app.partystapp.records.requests.FilterProjectRequest;
 import com.partyst.app.partystapp.records.requests.UpdateProjectRequest;
 import com.partyst.app.partystapp.records.responses.CreateProjectResponse;
+import com.partyst.app.partystapp.records.responses.ProjectBasicResponse;
+import com.partyst.app.partystapp.records.responses.ProjectListWrapperResponse;
 import com.partyst.app.partystapp.records.responses.ProjectResponse;
 import com.partyst.app.partystapp.services.ProjectService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +37,7 @@ public class ProjectController {
     @Autowired
     private ProjectService projectService;
 
-    @PostMapping("/updateProject")
+    @PostMapping("/update")
     public ResponseEntity<GenericResponse> projectUpdate( @RequestBody UpdateProjectRequest entity) {
         CreateProjectResponse createResult = projectService.updateProject(entity);
         return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(201, "Proyecto actualizado", createResult));
@@ -53,8 +57,9 @@ public class ProjectController {
     
     @PostMapping("/filter")
     public ResponseEntity<GenericResponse> filterProjects(@RequestBody FilterProjectRequest filters) {
-        List<Project> findedProjects = projectService.filterProjects(filters);
-        return ResponseEntity.ok(new GenericResponse<List<Project>>(201, "Proyectos filtrados", findedProjects));
+        List<ProjectBasicResponse> findedProjects = projectService.filterProjects(filters);
+        ProjectListWrapperResponse wrapper = new ProjectListWrapperResponse(findedProjects);
+        return ResponseEntity.ok(new GenericResponse<ProjectListWrapperResponse>(200, "Proyectos filtrados", wrapper));
     }
     
 
@@ -65,9 +70,31 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}")
-    public ResponseEntity<GenericResponse> getNyProjectId(@PathVariable Integer projectId ) {
-        List<ProjectResponse> findedProjects = projectService.getByProjectId(projectId);
-        return ResponseEntity.ok(new GenericResponse<List<ProjectResponse>>(201, "Proyectos filtrados", findedProjects));
+    public ResponseEntity<GenericResponse> getByProjectId(@PathVariable Integer projectId) {
+        try {
+            System.out.println("🎯 [CONTROLLER] GET /projects/" + projectId);
+            
+            ProjectResponse findedProjects = projectService.getProjectById(projectId);
+            
+            if (findedProjects == null) {
+                System.out.println("⚠️ [CONTROLLER] Proyecto no encontrado");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new GenericResponse<List<ProjectResponse>>(404, "Proyecto no encontrado", new ArrayList<>()));
+            }
+            
+            System.out.println("✅ [CONTROLLER] Retornando proyecto encontrado");
+            return ResponseEntity.ok(new GenericResponse<ProjectResponse>(
+                200,
+                "Proyecto encontrado",
+                findedProjects
+            ));
+            
+        } catch (Exception e) {
+            System.err.println("❌ [CONTROLLER ERROR] " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new GenericResponse<List<ProjectResponse>>(500, "Error interno del servidor", new ArrayList<>()));
+        }
     }
     
     @DeleteMapping("/{projectId}/delete")

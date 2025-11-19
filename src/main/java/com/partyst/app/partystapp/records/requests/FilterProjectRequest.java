@@ -5,6 +5,6 @@ import java.util.List;
 import com.partyst.app.partystapp.entities.Skill;
 
 
-public record FilterProjectRequest(String title, String category, String categoryName, String type, List<Skill> skills, Boolean active) {
+public record FilterProjectRequest(String title, String category, Integer userId, String type, List<Skill> skills, Boolean active) {
 
 }
