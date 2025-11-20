@@ -44,6 +44,7 @@ public class User {
     private String cellphone;
     private String nickname;
     private String password;
+    private String biography;
 
     @ManyToMany
     @JoinTable(
@@ -66,5 +67,6 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "skill_id")
     )
     private Set<Skill> skills;
+    
 
 }

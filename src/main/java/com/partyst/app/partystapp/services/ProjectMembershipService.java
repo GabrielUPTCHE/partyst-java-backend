@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,7 +89,7 @@ public class ProjectMembershipService {
     /**
      * Obtener solicitudes pendientes de un proyecto
      */
-    public ProjectRequestsResponse getProjectRequests(Integer projectId) {
+    public ProjectRequestsResponse.Data getProjectRequests(Integer projectId) {
         logger.info("📋 [GET REQUESTS] Obteniendo solicitudes del proyecto {}", projectId);
 
         Project project = projectsRepository.findById(projectId)
@@ -110,11 +111,7 @@ public class ProjectMembershipService {
 
         logger.info("✅ Encontradas {} solicitudes pendientes", requestInfos.size());
 
-        return new ProjectRequestsResponse(
-            true,
-            "Solicitudes obtenidas exitosamente",
-            new ProjectRequestsResponse.Data(requestInfos)
-        );
+        return new ProjectRequestsResponse.Data(requestInfos);
     }
 
     /**
@@ -184,36 +181,34 @@ public class ProjectMembershipService {
      * Obtener miembros de un proyecto
      */
     public ProjectMembersResponse getProjectMembers(Integer projectId) {
-        logger.info("👥 [GET MEMBERS] Obteniendo miembros del proyecto {}", projectId);
-
         Project project = projectsRepository.findById(projectId)
             .orElseThrow(() -> new IllegalArgumentException("Proyecto no encontrado con ID: " + projectId));
 
+        User creator = userRepository.findById(project.getUserCreatorId().longValue())
+            .orElseThrow(() -> new IllegalArgumentException("Usuario creador no encontrado"));
+        
         Set<User> members = project.getUsers() != null ? project.getUsers() : new HashSet<>();
 
-        List<ProjectMembersResponse.MemberInfo> memberInfos = members.stream()
+        List<User> allMembers = new ArrayList<>();
+        allMembers.add(creator); 
+        allMembers.addAll(members.stream()
+            .filter(member -> !member.getUserId().equals(creator.getUserId())) 
+            .collect(Collectors.toList()));
+
+        List<ProjectMembersResponse.MemberInfo> memberInfos = allMembers.stream()
             .map(user -> new ProjectMembersResponse.MemberInfo(
                 user.getUserId().intValue(),
                 user.getName(),
                 user.getLastname(),
                 user.getNickname(),
                 user.getEmail(),
-                user.getUserId().intValue() == project.getUserCreatorId()
+                user.getUserId().equals(creator.getUserId()) 
             ))
             .collect(Collectors.toList());
 
-        logger.info("✅ Encontrados {} miembros", memberInfos.size());
-
-        return new ProjectMembersResponse(
-            true,
-            "Miembros obtenidos exitosamente",
-            new ProjectMembersResponse.Data(memberInfos)
-        );
+        return new ProjectMembersResponse(memberInfos);
     }
 
-    /**
-     * Eliminar miembro de un proyecto
-     */
     @Transactional
     public CreateProjectResponse removeMember(RemoveMemberRequest request) {
         logger.info("🗑️ [REMOVE MEMBER] Eliminando miembro - Proyecto: {}, Usuario: {}", 
@@ -225,20 +220,17 @@ public class ProjectMembershipService {
         User user = userRepository.findById(Long.valueOf(request.userid()))
             .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + request.userid()));
 
-        // Verificar que no sea el creador
         if (user.getUserId().intValue() == project.getUserCreatorId()) {
             logger.warn("⚠️ No se puede eliminar al creador del proyecto");
             return new CreateProjectResponse(false, "No se puede eliminar al creador del proyecto");
         }
 
-        // Remover usuario del proyecto
         if (project.getUsers() != null && project.getUsers().remove(user)) {
             projectsRepository.save(project);
             logger.info("✅ Usuario {} eliminado del proyecto {}", user.getEmail(), project.getName());
             return new CreateProjectResponse(true, "Miembro eliminado exitosamente");
         }
 
-        logger.warn("⚠️ Usuario {} no es miembro del proyecto {}", user.getEmail(), project.getName());
         return new CreateProjectResponse(false, "El usuario no es miembro del proyecto");
     }
 }

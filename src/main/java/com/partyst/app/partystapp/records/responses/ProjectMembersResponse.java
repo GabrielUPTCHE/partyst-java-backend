@@ -3,13 +3,8 @@ package com.partyst.app.partystapp.records.responses;
 import java.util.List;
 
 public record ProjectMembersResponse(
-    boolean success,
-    String message,
-    Data data
+    List<MemberInfo> members
 ) {
-    public record Data(
-        List<MemberInfo> members
-    ) {}
     
     public record MemberInfo(
         Integer userid,
