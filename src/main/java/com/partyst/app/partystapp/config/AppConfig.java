@@ -35,10 +35,10 @@ public class AppConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("*")     
-                        .allowedMethods("*")       
-                        .allowedHeaders("*");      
+                registry.addMapping("https://linkedartistfrontend.onrender.com")
+                        .allowedOrigins("https://linkedartistfrontend.onrender.com")     
+                        .allowedMethods("https://linkedartistfrontend.onrender.com")       
+                        .allowedHeaders("https://linkedartistfrontend.onrender.com");      
             }
         };
     }

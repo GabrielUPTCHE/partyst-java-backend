@@ -26,7 +26,7 @@ import org.springframework.http.HttpHeaders;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@CrossOrigin("*")
+@CrossOrigin("https://linkedartistfrontend.onrender.com")
 public class AuthController {
 
     @Autowired
