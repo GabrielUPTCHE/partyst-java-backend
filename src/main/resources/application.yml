@@ -39,7 +39,6 @@ spring:
     ansi:
       enabled: ALWAYS
 
-
 server:
     port: 8080
 
@@ -50,3 +49,8 @@ application:
       expiration: 86400000 
       refresh-token:
         expiration: 604800000
+
+microservices:
+  notifications:
+    url: https://notifications-service-mkdx.onrender.com
+    timeout: 10000
