@@ -1,14 +1,9 @@
 package com.partyst.app.partystapp.records.responses;
 
-import java.util.List;
+import java.util.Set;
 
-public record UserByIdResponse(
-    String name,
-    String lastname, 
-    String nickname,
-    String cellphone,
-    String email,
-    String password,
-    List<SkillResponse> skills,
-    String biography
-) {}
+import com.partyst.app.partystapp.entities.Skill;
+
+public record UserByIdResponse(Long userId, String nickname, String cellphone, String email, String lastname, String name, Set<Skill> skills, String biography) {
+
+}

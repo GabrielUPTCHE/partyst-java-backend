@@ -3,9 +3,6 @@ package com.partyst.app.partystapp.entities;
 import java.util.List;
 import java.util.Set;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -60,7 +57,6 @@ public class User {
 
     @ManyToMany(mappedBy = "users")
     @JsonIgnore
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Project> projects;
 
     @ManyToMany
@@ -71,5 +67,6 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "skill_id")
     )
     private Set<Skill> skills;
+    
 
 }

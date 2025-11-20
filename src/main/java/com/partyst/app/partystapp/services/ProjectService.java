@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.partyst.app.partystapp.config.ProjectSpecifications;
 import com.partyst.app.partystapp.entities.Category;
 import com.partyst.app.partystapp.entities.Project;
+import com.partyst.app.partystapp.entities.Skill;
 import com.partyst.app.partystapp.entities.Task;
 import com.partyst.app.partystapp.entities.User;
 import com.partyst.app.partystapp.records.dtos.SkillBasicDTO;
@@ -195,12 +196,14 @@ public class ProjectService {
                 taskDTOs);
     }
 
+    @Transactional
     public CreateProjectResponse updateProject(UpdateProjectRequest request) {
         System.out.println("🔄 [UPDATE] Iniciando actualización...");
         System.out.println("📥 Request: projectId=" + request.projectId() +
                 ", title=" + request.title() +
                 ", description=" + request.description() +
-                ", categoryId=" + request.categoryId());
+                ", categoryId=" + request.categoryId() +
+                ", skills count=" + (request.skills() != null ? request.skills().size() : 0));
 
         Project updatedProject = projectsRepository.findById(request.projectId()).orElse(null);
         if (updatedProject != null) {
@@ -210,37 +213,96 @@ public class ProjectService {
             System.out.println("   - category: " + (updatedProject.getCategory() != null
                     ? updatedProject.getCategory().getCategoryId() + " - " + updatedProject.getCategory().getName()
                     : "null"));
+            System.out.println("   - skills actuales: "
+                    + (updatedProject.getSkills() != null ? updatedProject.getSkills().size() : 0));
 
-            // ACTUALIZAR CAMPOS
-            System.out.println("🔄 Actualizando name: '" + updatedProject.getName() + "' → '" + request.title() + "'");
+            // 1. ACTUALIZAR CAMPOS BÁSICOS
+            System.out
+                    .println("🔄 Actualizando nombre: '" + updatedProject.getName() + "' → '" + request.title() + "'");
             updatedProject.setName(request.title());
 
-            System.out.println("🔄 Actualizando description: '" + updatedProject.getDescription() + "' → '"
+            System.out.println("🔄 Actualizando descripción: '" + updatedProject.getDescription() + "' → '"
                     + request.description() + "'");
             updatedProject.setDescription(request.description());
 
-            // ACTUALIZAR CATEGORÍA
+            // 2. ACTUALIZAR CATEGORÍA
             if (request.categoryId() != null) {
                 Category category = categoryRepository.findById(request.categoryId()).orElse(null);
-                System.out.println("🔄 Actualizando categoría: " +
-                        (updatedProject.getCategory() != null ? updatedProject.getCategory().getCategoryId() : "null") +
-                        " → " + request.categoryId());
+                String currentCategory = updatedProject.getCategory() != null
+                        ? updatedProject.getCategory().getCategoryId() + " - " + updatedProject.getCategory().getName()
+                        : "null";
+                String newCategory = category != null ? category.getCategoryId() + " - " + category.getName() : "null";
+
+                System.out.println("🔄 Actualizando categoría: " + currentCategory + " → " + newCategory);
                 updatedProject.setCategory(category);
+            } else {
+                System.out.println("🔄 No se proporcionó categoryId, manteniendo categoría actual");
             }
 
-            // ACTUALIZAR SKILLS (esto ya funciona según los logs)
+            // 3. ACTUALIZAR SKILLS
             System.out.println("🔄 Actualizando skills...");
-            updatedProject.setSkills(request.skills());
+            if (request.skills() != null && !request.skills().isEmpty()) {
+                System.out.println("🔄 Procesando " + request.skills().size() + " skills...");
 
+                Set<Skill> managedSkills = new HashSet<>();
+
+                for (Skill requestSkill : request.skills()) {
+                    System.out.println("   - Procesando skill - ID: " + requestSkill.getSkillId() + ", Name: "
+                            + requestSkill.getName());
+
+                    if (requestSkill.getSkillId() != null) {
+                        Skill existingSkill = skillRepository.findById(requestSkill.getSkillId())
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                        "Skill no encontrado con ID: " + requestSkill.getSkillId()));
+                        managedSkills.add(existingSkill);
+                        System.out.println("     ✅ Skill encontrado: " + existingSkill.getName() + " (ID: "
+                                + existingSkill.getSkillId() + ")");
+                    } else {
+                        if (requestSkill.getName() == null || requestSkill.getName().trim().isEmpty()) {
+                            System.out.println("     ⚠️  Skill sin ID ni nombre, saltando...");
+                            continue;
+                        }
+                        Skill newSkill = new Skill();
+                        newSkill.setName(requestSkill.getName().trim());
+                        Skill savedSkill = skillRepository.save(newSkill);
+                        managedSkills.add(savedSkill);
+                        System.out.println("     🆕 Nuevo skill creado: " + savedSkill.getName());
+                    }
+                }
+
+                // Limpiar y asignar nuevos skills
+                if (updatedProject.getSkills() != null) {
+                    updatedProject.getSkills().clear();
+                }
+                updatedProject.setSkills(managedSkills);
+                System.out.println("   - Total skills asignados: " + managedSkills.size());
+            } else {
+                if (updatedProject.getSkills() != null) {
+                    updatedProject.getSkills().clear();
+                }
+                System.out.println("   - Skills limpiados (request sin skills)");
+            }
+
+            // 4. GUARDAR PROYECTO
             System.out.println("💾 Guardando proyecto...");
             Project savedProject = projectsRepository.save(updatedProject);
 
-            System.out.println("✅ Proyecto guardado. Nuevos datos:");
-            System.out.println("   - name: " + savedProject.getName());
-            System.out.println("   - description: " + savedProject.getDescription());
-            System.out.println("   - category: " + (savedProject.getCategory() != null
+            // Forzar flush para ver errores inmediatamente
+            projectsRepository.flush();
+
+            System.out.println("✅ Proyecto guardado exitosamente");
+            System.out.println("📊 Resumen final:");
+            System.out.println("   - Nombre: " + savedProject.getName());
+            System.out.println("   - Descripción: " + savedProject.getDescription());
+            System.out.println("   - Categoría: " + (savedProject.getCategory() != null
                     ? savedProject.getCategory().getCategoryId() + " - " + savedProject.getCategory().getName()
                     : "null"));
+            System.out.println(
+                    "   - Skills: " + (savedProject.getSkills() != null ? savedProject.getSkills().size() : 0));
+            if (savedProject.getSkills() != null) {
+                savedProject.getSkills().forEach(
+                        skill -> System.out.println("     • " + skill.getName() + " (ID: " + skill.getSkillId() + ")"));
+            }
 
             return new CreateProjectResponse(true, "Se actualizó el proyecto");
         }

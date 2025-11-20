@@ -13,7 +13,6 @@ import com.partyst.app.partystapp.records.requests.RejectRequestRequest;
 import com.partyst.app.partystapp.records.requests.RemoveMemberRequest;
 import com.partyst.app.partystapp.records.requests.UpdateProjectRequest;
 import com.partyst.app.partystapp.records.responses.CreateProjectResponse;
-import com.partyst.app.partystapp.records.responses.JoinProjectResponse;
 import com.partyst.app.partystapp.records.responses.ProjectBasicResponse;
 import com.partyst.app.partystapp.records.responses.ProjectListWrapperResponse;
 import com.partyst.app.partystapp.records.responses.ProjectMembersResponse;
@@ -50,6 +49,7 @@ public class ProjectController {
 
     @PostMapping("/update")
     public ResponseEntity<GenericResponse> projectUpdate( @RequestBody UpdateProjectRequest entity) {
+        System.out.println(entity.skills()+"--------------------------------------------------------------------");
         CreateProjectResponse createResult = projectService.updateProject(entity);
         return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(201, "Proyecto actualizado", createResult));
     }
@@ -122,27 +122,15 @@ public class ProjectController {
      * POST /projects/join
      */
     @PostMapping("/join")
-    public ResponseEntity<GenericResponse<JoinProjectResponse>> joinProject(@RequestBody JoinProjectRequest request) {
-        try {
-            System.out.println("🎯 [CONTROLLER] POST /projects/join - Usuario: " + request.userId() + 
-                              ", Proyecto: " + request.projectId());
-            
-            JoinProjectResponse result = membershipService.joinProject(request);
-            
-            HttpStatus status = HttpStatus.valueOf(result.code());
-            
-            return ResponseEntity.status(status)
-                .body(new GenericResponse<JoinProjectResponse>(
-                    result.code(), 
-                    result.message(), 
-                    result
-                ));
-                
-        } catch (Exception e) {
-            System.err.println("❌ [CONTROLLER ERROR] " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new GenericResponse<>(500, "Error interno del servidor", null));
-        }
+    public ResponseEntity<GenericResponse<CreateProjectResponse>> joinProject(@RequestBody JoinProjectRequest request) {
+        System.out.println("🎯 [CONTROLLER] POST /projects/join - Usuario: " + request.userId() + 
+                          ", Proyecto: " + request.projectId());
+        CreateProjectResponse result = membershipService.joinProject(request);
+        return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(
+            result.succes() ? 200 : 400, 
+            result.message(), 
+            result
+        ));
     }
 
     /**
@@ -150,10 +138,9 @@ public class ProjectController {
      * GET /projects/{projectId}/requests
      */
     @GetMapping("/{projectId}/requests")
-    public ResponseEntity<GenericResponse<ProjectRequestsResponse>> getProjectRequests(@PathVariable Integer projectId) {
-        System.out.println("🎯 [CONTROLLER] GET /projects/" + projectId + "/requests");
-        ProjectRequestsResponse result = membershipService.getProjectRequests(projectId);
-        return ResponseEntity.ok(new GenericResponse<ProjectRequestsResponse>(200, result.message(), result));
+    public ResponseEntity<GenericResponse<ProjectRequestsResponse.Data>> getProjectRequests(@PathVariable Integer projectId) {
+        ProjectRequestsResponse.Data result = membershipService.getProjectRequests(projectId);
+        return ResponseEntity.ok(new GenericResponse<ProjectRequestsResponse.Data>(200, "jk", result));
     }
 
     /**
@@ -174,27 +161,16 @@ public class ProjectController {
      */
     @PostMapping("/requests/decline")
     public ResponseEntity<GenericResponse<CreateProjectResponse>> rejectRequest(@RequestBody RejectRequestRequest request) {
-        System.out.println("🎯 [CONTROLLER] POST /projects/requests/decline - Proyecto: " + 
-                          request.projectid() + ", Usuario: " + request.userid());
         CreateProjectResponse result = membershipService.rejectRequest(request);
         return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(200, result.message(), result));
     }
 
-    /**
-     * Obtener miembros de un proyecto
-     * GET /projects/{projectId}/members
-     */
     @GetMapping("/{projectId}/members")
     public ResponseEntity<GenericResponse<ProjectMembersResponse>> getProjectMembers(@PathVariable Integer projectId) {
-        System.out.println("🎯 [CONTROLLER] GET /projects/" + projectId + "/members");
         ProjectMembersResponse result = membershipService.getProjectMembers(projectId);
-        return ResponseEntity.ok(new GenericResponse<ProjectMembersResponse>(200, result.message(), result));
+        return ResponseEntity.ok(new GenericResponse<>(200, "Miembros obtenidos exitosamente", result));
     }
 
-    /**
-     * Eliminar miembro de un proyecto
-     * DELETE /projects/member
-     */
     @DeleteMapping("/member")
     public ResponseEntity<GenericResponse<CreateProjectResponse>> removeMember(@RequestBody RemoveMemberRequest request) {
         System.out.println("🎯 [CONTROLLER] DELETE /projects/member - Proyecto: " + 

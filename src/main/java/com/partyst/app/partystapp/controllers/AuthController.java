@@ -18,6 +18,7 @@ import com.partyst.app.partystapp.services.AsyncIntegrationService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -27,7 +28,6 @@ import org.springframework.http.HttpHeaders;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@CrossOrigin("https://linkedartistfrontend.onrender.com")
 public class AuthController {
 
     @Autowired
