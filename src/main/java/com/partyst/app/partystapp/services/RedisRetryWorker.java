@@ -54,7 +54,7 @@ public class RedisRetryWorker {
                 Object data = record.getValue().get("data");
                 GenericRedis<?> req = objectMapper.convertValue(data, GenericRedis.class);
 
-                System.out.println("➡️ Intentando procesar: " + req.type());
+                System.out.println("Intentando procesar: " + req.type());
 
                 switch (req.type()) {
 

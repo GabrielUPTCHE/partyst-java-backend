@@ -13,11 +13,15 @@ import org.springframework.transaction.CannotCreateTransactionException;
 
 import com.partyst.app.partystapp.auth.repository.Token;
 import com.partyst.app.partystapp.auth.repository.TokenRepository;
+import com.partyst.app.partystapp.entities.RecoveryCode;
 import com.partyst.app.partystapp.entities.User;
 import com.partyst.app.partystapp.records.GenericRedis;
+import com.partyst.app.partystapp.records.GenericResponse;
 import com.partyst.app.partystapp.records.requests.LoginRequest;
 import com.partyst.app.partystapp.records.requests.RegisterRequest;
+import com.partyst.app.partystapp.records.requests.ValidateCodePasswordRequest;
 import com.partyst.app.partystapp.records.responses.TokenResponse;
+import com.partyst.app.partystapp.repositories.RecoveryCodeRepository;
 import com.partyst.app.partystapp.repositories.UserRepository;
 import com.partyst.app.partystapp.services.RedisQueueService;
 
@@ -40,8 +44,21 @@ public class AuthService {
     private JwtService jwtService;
 
     @Autowired
+    private RecoveryCodeRepository recoveryCodeRepository;
+
+    @Autowired
     private AuthenticationManager authenticationManager;
 
+    public GenericResponse<Boolean> validateCodePassword(ValidateCodePasswordRequest request){
+        RecoveryCode recoveryCode = recoveryCodeRepository.findByEmail(request.email()).orElse(null);
+        if (recoveryCode == null) {
+            return new GenericResponse<Boolean>(204, "El email no esta registrado", false);
+        }
+        if (request.email().equals(recoveryCode.getEmail()) &&  request.code().equals(recoveryCode.getTokenRecovery())) {
+            return new GenericResponse<Boolean>(200, "El codigo de confirmacion es correcto", true);
+        }
+        return new GenericResponse<Boolean>(204, "El codigo es incorrecto", false);
+    }
 
     public User buildUserRegister(RegisterRequest request) {
         User user = User.builder()

@@ -7,16 +7,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.partyst.app.partystapp.auth.service.AuthService;
 import com.partyst.app.partystapp.records.GenericResponse;
+import com.partyst.app.partystapp.records.requests.ForgetPasswordRequest;
 import com.partyst.app.partystapp.records.requests.LoginRequest;
 import com.partyst.app.partystapp.records.requests.RegisterRequest;
+import com.partyst.app.partystapp.records.requests.ValidateCodePasswordRequest;
 import com.partyst.app.partystapp.records.responses.ForgetPasswordResponse;
 import com.partyst.app.partystapp.records.responses.TokenResponse;
+import com.partyst.app.partystapp.services.AsyncIntegrationService;
 
-import io.micrometer.core.ipc.http.HttpSender.Response;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -31,6 +32,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private AsyncIntegrationService asyncIntegrationService;
 
 
     @PostMapping("/register")
@@ -52,13 +56,19 @@ public class AuthController {
         return  ResponseEntity.ok(new GenericResponse<TokenResponse>(200, "Refresco exitoso", refreshResponse));
     }
 
-   /*  @GetMapping("/forgetPassword")
-    public ResponseEntity<GenericResponse> forgetPassword(){
-        ForgetPasswordResponse forgetPasswordResponse = new ForgetPasswordResponse(true);
-        //terminarrr
-        return ResponseEntity.ok(new GenericResponse<ForgetPasswordResponse>(201, "Se envio correo para cambiar la contraseña", forgetPasswordResponse));
+    @PostMapping("/forgetPassword")
+    public ResponseEntity<GenericResponse> forgetPassword(@RequestBody ForgetPasswordRequest request){
+        ForgetPasswordResponse forgetPasswordResponse = asyncIntegrationService.sendEmail(request.email());
+        return ResponseEntity.ok(new GenericResponse<Boolean>(201, forgetPasswordResponse.message(), forgetPasswordResponse.sended()));
     }
-     */
+
+    @PostMapping("/validateCodePassword")
+    public ResponseEntity<GenericResponse> postMethodName(@RequestBody ValidateCodePasswordRequest entity) {
+        GenericResponse<Boolean> validateCodePassword = authService.validateCodePassword(entity);
+        return ResponseEntity.ok(validateCodePassword);
+    }
+    
+    
     
 
 }

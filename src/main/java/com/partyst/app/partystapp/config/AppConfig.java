@@ -1,6 +1,7 @@
 package com.partyst.app.partystapp.config;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -25,6 +28,7 @@ import com.partyst.app.partystapp.entities.User;
 import com.partyst.app.partystapp.repositories.UserRepository;
 
 @Configuration
+@EnableAsync
 public class AppConfig {
 
     @Autowired
@@ -86,4 +90,14 @@ public class AppConfig {
         return template;
     }
 
+    @Bean(name = "taskExecutor")
+    public Executor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(5);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("async-email-");
+        executor.initialize();
+        return executor;
+    }
 }
