@@ -1,4 +1,9 @@
 spring:
+  data:
+    redis:
+      url: rediss://default:AZgWAAIncDI2YTg1NjJiZDI2MGM0ZDI5YjIwMTc1ZTI3NmZmZTlkYnAyMzg5MzQ@becoming-sculpin-38934.upstash.io:6379
+      ssl: 
+        enabled: false
   application:
     name: partystapp
 
@@ -7,13 +12,24 @@ spring:
     username: administrator
     password: H6Zwj6TSlL8htqwUD4hlvelwF53eSWFB
     driver-class-name: org.postgresql.Driver
+    hikari:
+      initialization-fail-timeout: -1
+      connection-test-query: SELECT 1
+      connection-timeout: 30000   # espera 30s antes de marcar timeout
+      validation-timeout: 5000    # 5s para validar conex
+      max-lifetime: 1800000       # 30 min
+      keepalive-time: 300000      # envía ping cada 5 min
+      idle-timeout: 600000        # 10 min
 
   jpa:
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+        temp:
+            use_jdbc_metadata_defaults: false
     show-sql: true
   jdbc:
     template:

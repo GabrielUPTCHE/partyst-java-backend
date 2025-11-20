@@ -3,23 +3,30 @@ package com.partyst.app.partystapp.auth.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.CannotCreateTransactionException;
 
 import com.partyst.app.partystapp.auth.repository.Token;
 import com.partyst.app.partystapp.auth.repository.TokenRepository;
 import com.partyst.app.partystapp.entities.User;
+import com.partyst.app.partystapp.records.GenericRedis;
 import com.partyst.app.partystapp.records.requests.LoginRequest;
 import com.partyst.app.partystapp.records.requests.RegisterRequest;
 import com.partyst.app.partystapp.records.responses.TokenResponse;
 import com.partyst.app.partystapp.repositories.UserRepository;
+import com.partyst.app.partystapp.services.RedisQueueService;
 
 @Service
 public class AuthService {
 
+    @Autowired
+    private RedisQueueService redisQueueService;
+    
     @Autowired
     private TokenService tokenService;
 
@@ -35,20 +42,38 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    public TokenResponse register(RegisterRequest request) {
+
+    public User buildUserRegister(RegisterRequest request) {
         User user = User.builder()
-            .name(request.name())
-            .email(request.email())
-            .password(passwordEncoder.encode(request.password()))
-            .lastname(request.lastname())
-            .nickname(request.nickname())
-            .cellphone(request.celphone())
-            .build();
+           .name(request.name())
+           .email(request.email())
+           .password(passwordEncoder.encode(request.password()))
+           .lastname(request.lastname())
+           .nickname(request.nickname())
+           .cellphone(request.celphone())
+         .build();
+         return user;
+    }
+
+    public TokenResponse register(RegisterRequest request) {
+        User user = buildUserRegister(request);
+        try {
         User savedUser = userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         saveUserToken(savedUser, jwtToken);
         return new TokenResponse(jwtToken, refreshToken);
+        } catch (Exception e) {   
+            
+            System.out.println("⚠ Se añade a cola Redis LIST");
+            redisQueueService.enqueue(
+                new GenericRedis<>("REGISTER_REQUEST", user)
+            );
+            String jwtToken = "asdsafdsad";
+            String refreshToken = "sadasfsafas";
+            return new TokenResponse(jwtToken, refreshToken);
+
+        }
     }
 
     public TokenResponse login(LoginRequest request) {
