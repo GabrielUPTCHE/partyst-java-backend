@@ -36,16 +36,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(request -> {
-                var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-                corsConfig.setAllowedOrigins(java.util.List.of("http://localhost:4200", "https://linkedartistfrontend.onrender.com"));
-                corsConfig.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                corsConfig.setAllowedHeaders(java.util.List.of("*"));
-                corsConfig.setExposedHeaders(java.util.List.of("Authorization"));
-                corsConfig.setAllowCredentials(true);
-                corsConfig.setMaxAge(3600L);
-                return corsConfig;
-            }))
+            .cors(cors -> cors.disable())
             .authorizeHttpRequests(req -> 
                 req.requestMatchers("/auth/**").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -57,6 +48,8 @@ public class SecurityConfig {
         
         return http.build();
     }
+
+
 
     private void logout(String token) {
         if(token == null || !token.startsWith("Bearer ")){
