@@ -50,7 +50,7 @@ public class TaskService {
 
         User user = userRepository.findByEmail(request.assignedUserEmail())
             .orElseThrow(() -> {
-                System.err.println("⚠️ Usuario no encontrado con email: " + request.assignedUserEmail());
+                System.err.println("Usuario no encontrado con email: " + request.assignedUserEmail());
                 return new IllegalArgumentException("Usuario no encontrado con email: " + request.assignedUserEmail());
             });
 

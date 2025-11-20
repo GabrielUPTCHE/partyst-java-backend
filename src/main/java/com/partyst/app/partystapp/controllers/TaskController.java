@@ -46,14 +46,12 @@ public class TaskController {
     }*/
     @PostMapping("/create")
     public ResponseEntity<GenericResponse> createTask(@RequestBody CreateTaskRequest entity) {
-        System.out.println("🎯 [CONTROLLER] POST /task/create");
         TaskResponse resultCreated = taskService.createTask(entity);
         return ResponseEntity.ok(new GenericResponse<TaskResponse>(201, "Tarea creada", resultCreated));
     }
 
     @PutMapping("/update")
     public ResponseEntity<GenericResponse> uptadeTask(@RequestBody UpdateTaskRequest entity) {
-        System.out.println("🎯 [CONTROLLER] PUT /task/update");
         TaskResponse resultUpdated = taskService.updateTask(entity);
         return ResponseEntity.ok(new GenericResponse<TaskResponse>(200, "Tarea actualizada", resultUpdated));
     }
