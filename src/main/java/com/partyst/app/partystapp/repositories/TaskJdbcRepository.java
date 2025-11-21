@@ -28,7 +28,6 @@ public class TaskJdbcRepository {
         """;
 
         List<Task> tasks = jdbcTemplate.query(sql, new Object[]{projectId}, (rs, rowNum) -> {
-            // Construir el usuario solo si existe (user_id no es null)
             User assignedUser = null;
             Long userId = rs.getObject("user_id", Long.class);
             

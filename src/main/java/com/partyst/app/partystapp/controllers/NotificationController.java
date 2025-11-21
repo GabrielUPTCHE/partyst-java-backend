@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.partyst.app.partystapp.entities.Task;
 import com.partyst.app.partystapp.records.GenericResponse;
 import com.partyst.app.partystapp.records.requests.NotificationUserRequest;
 import com.partyst.app.partystapp.records.responses.CreateProjectResponse;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController

@@ -1,24 +1,19 @@
 package com.partyst.app.partystapp.auth.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.CannotCreateTransactionException;
-
 import com.partyst.app.partystapp.auth.repository.Token;
-import com.partyst.app.partystapp.auth.repository.TokenRepository;
 import com.partyst.app.partystapp.entities.RecoveryCode;
 import com.partyst.app.partystapp.entities.User;
 import com.partyst.app.partystapp.records.GenericRedis;
 import com.partyst.app.partystapp.records.GenericResponse;
 import com.partyst.app.partystapp.records.requests.LoginRequest;
 import com.partyst.app.partystapp.records.requests.RegisterRequest;
+import com.partyst.app.partystapp.records.requests.ResetPasswordRequest;
 import com.partyst.app.partystapp.records.requests.ValidateCodePasswordRequest;
 import com.partyst.app.partystapp.records.responses.TokenResponse;
 import com.partyst.app.partystapp.repositories.RecoveryCodeRepository;
@@ -100,7 +95,6 @@ public class AuthService {
         User user = userRepository.findByEmail(request.email()).orElseThrow();
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user); 
-        /* revokeAllUserTokens(user); */
         saveUserToken(user, jwtToken);
         return new TokenResponse(jwtToken, refreshToken);
     }
@@ -114,10 +108,6 @@ public class AuthService {
             .build();
         tokenService.saveToken(token);
     }
-
-   /*  private void revokeAllUserTokens(User user) {
-        List<Token> validUserTokens = tokenService.
-    } */
 
     public TokenResponse refreshToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -134,8 +124,29 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid Refresh token");
         }
         String accesToken = jwtService.generateToken(user);
-        /* revokeAllUserTokens(user); */
         saveUserToken(user, accesToken);
         return new  TokenResponse(accesToken, refreshToken);
     }
+
+    public GenericResponse<Boolean> resetPassword(ResetPasswordRequest request) {
+    try {
+        RecoveryCode recoveryCode = recoveryCodeRepository.findByEmail(request.email()).orElse(null);
+        if (recoveryCode == null || !recoveryCode.getTokenRecovery().equals(request.confirmationCode())) {
+            return new GenericResponse<Boolean>(400, "Código de confirmación inválido", false);
+        }
+
+        User user = userRepository.findByEmail(request.email())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+
+        recoveryCodeRepository.delete(recoveryCode);
+
+        return new GenericResponse<Boolean>(200, "Contraseña actualizada exitosamente", true);
+
+    } catch (Exception e) {
+        return new GenericResponse<Boolean>(500, "Error al actualizar la contraseña: " + e.getMessage(), false);
+    }
+}
 }

@@ -14,15 +14,12 @@ import com.partyst.app.partystapp.records.responses.CreateProjectResponse;
 import com.partyst.app.partystapp.records.responses.TaskResponse;
 import com.partyst.app.partystapp.services.TaskService;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 
 
@@ -38,12 +35,7 @@ public class TaskController {
         Task taskFinded = taskService.getTaskByProjectidTaskId( entity.taskId());
         return ResponseEntity.ok(new GenericResponse<Task>(201, "Tareas encontradas", taskFinded));
     }
-    /*
-    @PostMapping("/AllbyUserProject")
-    public ResponseEntity<GenericResponse> byUserProjectTwo( @RequestBody TaskByUserProjectRequest entity) {
-        List<Task> taskFinded = taskService.getTasksByProjectidTaskId( entity.taskId(), entity.projectId());
-        return ResponseEntity.ok(new GenericResponse<List<Task>>(201, "Tareas encontradas", taskFinded));
-    }*/
+
     @PostMapping("/create")
     public ResponseEntity<GenericResponse> createTask(@RequestBody CreateTaskRequest entity) {
         TaskResponse resultCreated = taskService.createTask(entity);
@@ -58,14 +50,12 @@ public class TaskController {
 
     @PutMapping("/state")
     public ResponseEntity<GenericResponse> updateTaskState(@RequestBody UpdateTaskStateRequest request) {
-        System.out.println("🎯 [CONTROLLER] PUT /task/state");
         TaskResponse resultUpdated = taskService.updateTaskState(request);
         return ResponseEntity.ok(new GenericResponse<TaskResponse>(200, "Estado actualizado", resultUpdated));
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<GenericResponse> deleteTask(@RequestBody DeleteTaskRequest request){
-        System.out.println("🎯 [CONTROLLER] DELETE /task/delete - taskId: " + request.taskId());
         CreateProjectResponse resultDeleted = taskService.deleteTask(request);
         return ResponseEntity.ok(new GenericResponse<CreateProjectResponse>(200, "Tarea eliminada", resultDeleted));
     }

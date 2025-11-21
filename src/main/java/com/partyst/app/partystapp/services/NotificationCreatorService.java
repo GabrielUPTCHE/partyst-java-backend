@@ -5,20 +5,6 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Servicio auxiliar para crear notificaciones de forma síncrona SIN KAFKA
- * 
- * Este servicio proporciona métodos helper que crean notificaciones
- * directamente en el microservicio vía HTTP POST.
- * 
- * IMPORTANTE: Requiere que el microservicio Python tenga el endpoint POST /notifications
- * 
- * Tipos de notificación disponibles:
- * - "warning": Advertencias, rechazos, eliminaciones
- * - "success": Confirmaciones, aceptaciones, éxitos
- * - "informative": Información general, cambios de estado
- * - "application": Solicitudes, invitaciones
- */
 @Slf4j
 @Service
 public class NotificationCreatorService {
@@ -26,175 +12,128 @@ public class NotificationCreatorService {
     @Autowired
     private NotificationService notificationService;
 
-    /**
-     * Cuando un usuario solicita unirse a un proyecto
-     */
     public void notifyNewJoinRequest(Long creatorId, String projectName, String requestingUserName) {
         log.info("Creando notificación de solicitud de membresía para usuario {}", creatorId);
-        
+
         notificationService.createNotification(
-            creatorId,
-            "Nueva solicitud de membresía",
-            requestingUserName + " quiere unirse al proyecto '" + projectName + "'",
-            "application"
-        );
+                creatorId,
+                "Nueva solicitud de membresía",
+                requestingUserName + " quiere unirse al proyecto '" + projectName + "'",
+                "application");
     }
 
-    /**
-     * Cuando se acepta una solicitud de membresía
-     */
     public void notifyJoinRequestAccepted(Long userId, String projectName) {
         log.info("Notificando aceptación de solicitud a usuario {}", userId);
-        
+
         notificationService.createNotification(
-            userId,
-            "Solicitud aceptada",
-            "Tu solicitud para unirte al proyecto '" + projectName + "' fue aceptada. ¡Bienvenido!",
-            "success"
-        );
+                userId,
+                "Solicitud aceptada",
+                "Tu solicitud para unirte al proyecto '" + projectName + "' fue aceptada. ¡Bienvenido!",
+                "success");
     }
 
-    /**
-     * Cuando se rechaza una solicitud
-     */
     public void notifyJoinRequestRejected(Long userId, String projectName) {
         log.info("Notificando rechazo de solicitud a usuario {}", userId);
-        
+
         notificationService.createNotification(
-            userId,
-            "Solicitud rechazada",
-            "Tu solicitud para unirte al proyecto '" + projectName + "' fue rechazada",
-            "warning"
-        );
+                userId,
+                "Solicitud rechazada",
+                "Tu solicitud para unirte al proyecto '" + projectName + "' fue rechazada",
+                "warning");
     }
 
-    /**
-     * Cuando se asigna una tarea
-     */
     public void notifyTaskAssigned(Long userId, String taskTitle, String projectName) {
         log.info("Notificando asignación de tarea a usuario {}", userId);
-        
+
         notificationService.createNotification(
-            userId,
-            "Nueva tarea asignada",
-            "Se te asignó la tarea '" + taskTitle + "' en el proyecto '" + projectName + "'",
-            "informative"
-        );
+                userId,
+                "Nueva tarea asignada",
+                "Se te asignó la tarea '" + taskTitle + "' en el proyecto '" + projectName + "'",
+                "informative");
     }
 
-    /**
-     * Cuando cambia el estado de una tarea
-     */
     public void notifyTaskStatusChanged(Long userId, String taskTitle, String oldStatus, String newStatus) {
         log.info("Notificando cambio de estado de tarea a usuario {}", userId);
-        
+
         notificationService.createNotification(
-            userId,
-            "Estado de tarea actualizado",
-            "La tarea '" + taskTitle + "' cambió de '" + oldStatus + "' a '" + newStatus + "'",
-            "informative"
-        );
+                userId,
+                "Estado de tarea actualizado",
+                "La tarea '" + taskTitle + "' cambió de '" + oldStatus + "' a '" + newStatus + "'",
+                "informative");
     }
 
-    /**
-     * Cuando se invita a un proyecto
-     */
     public void notifyProjectInvitation(Long userId, String projectName, String invitedBy) {
         log.info("Notificando invitación a proyecto a usuario {}", userId);
-        
+
         notificationService.createNotification(
-            userId,
-            "Invitación a proyecto",
-            invitedBy + " te invitó al proyecto '" + projectName + "'",
-            "application"
-        );
+                userId,
+                "Invitación a proyecto",
+                invitedBy + " te invitó al proyecto '" + projectName + "'",
+                "application");
     }
 
-    /**
-     * Cuando se remueve un miembro
-     */
     public void notifyMemberRemoved(Long userId, String projectName, String removedBy) {
         log.info("Notificando remoción de proyecto a usuario {}", userId);
-        
+
         notificationService.createNotification(
-            userId,
-            "Removido de proyecto",
-            "Fuiste removido del proyecto '" + projectName + "' por " + removedBy,
-            "warning"
-        );
+                userId,
+                "Removido de proyecto",
+                "Fuiste removido del proyecto '" + projectName + "' por " + removedBy,
+                "warning");
     }
 
-    /**
-     * Cuando un proyecto se completa
-     */
     public void notifyProjectCompleted(Long userId, String projectName) {
         log.info("Notificando proyecto completado a usuario {}", userId);
-        
+
         notificationService.createNotification(
-            userId,
-            "Proyecto completado",
-            "El proyecto '" + projectName + "' ha sido marcado como completado. ¡Felicitaciones!",
-            "success"
-        );
+                userId,
+                "Proyecto completado",
+                "El proyecto '" + projectName + "' ha sido marcado como completado. ¡Felicitaciones!",
+                "success");
     }
 
-    /**
-     * Cuando se agrega un comentario a una tarea
-     */
     public void notifyTaskComment(Long userId, String taskTitle, String commenterName) {
         log.info("Notificando comentario en tarea a usuario {}", userId);
-        
+
         notificationService.createNotification(
-            userId,
-            "Nuevo comentario en tarea",
-            commenterName + " comentó en la tarea '" + taskTitle + "'",
-            "informative"
-        );
+                userId,
+                "Nuevo comentario en tarea",
+                commenterName + " comentó en la tarea '" + taskTitle + "'",
+                "informative");
     }
 
-    /**
-     * Notificación genérica personalizada
-     */
     public void notifyCustom(Long userId, String type, String title, String message) {
         log.info("Creando notificación personalizada para usuario {}", userId);
-        
+
         notificationService.createNotification(userId, title, message, type);
     }
 
-    /**
-     * Recordatorio de tareas pendientes
-     */
     public void notifyPendingTasks(Long userId, int taskCount) {
         if (taskCount > 0) {
             log.info("Notificando tareas pendientes a usuario {}", userId);
-            
-            String message = taskCount == 1 
-                ? "Tienes 1 tarea pendiente por completar"
-                : "Tienes " + taskCount + " tareas pendientes por completar";
-            
+
+            String message = taskCount == 1
+                    ? "Tienes 1 tarea pendiente por completar"
+                    : "Tienes " + taskCount + " tareas pendientes por completar";
+
             notificationService.createNotification(
-                userId,
-                "Tareas pendientes",
-                message,
-                "informative"
-            );
+                    userId,
+                    "Tareas pendientes",
+                    message,
+                    "informative");
         }
     }
 
-    /**
-     * Notificación de deadline próximo
-     */
     public void notifyApproachingDeadline(Long userId, String projectName, int daysLeft) {
         log.info("Notificando deadline próximo a usuario {}", userId);
-        
+
         String urgency = daysLeft <= 1 ? "¡URGENTE! " : "";
         String days = daysLeft == 1 ? "1 día" : daysLeft + " días";
-        
+
         notificationService.createNotification(
-            userId,
-            urgency + "Deadline próximo",
-            "El proyecto '" + projectName + "' vence en " + days,
-            "warning"
-        );
+                userId,
+                urgency + "Deadline próximo",
+                "El proyecto '" + projectName + "' vence en " + days,
+                "warning");
     }
 }

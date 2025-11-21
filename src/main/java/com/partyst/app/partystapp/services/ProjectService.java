@@ -66,39 +66,28 @@ public class ProjectService {
 
     public List<ProjectBasicResponse> filterProjects(FilterProjectRequest filters) {
 
-        // Construimos la specification dinámica
         Specification<Project> spec = Specification.where(null);
 
-        // Filtrar por título
         spec = spec.and(ProjectSpecifications.hasTitle(filters.title()));
 
-        // Filtrar por categoría
         spec = spec.and(ProjectSpecifications.hasCategory(filters.category()));
 
-        // Filtrar por skills
         spec = spec.and(ProjectSpecifications.hasSkills(filters.skills()));
 
-        // Filtrar por estado activo
         spec = spec.and(ProjectSpecifications.isActive(filters.active()));
 
-        // Filtro por tipo (CRÍTICO PARA EL DASHBOARD)
         if ("public".equalsIgnoreCase(filters.type())) {
-            // TIPO PUBLIC: Todos los proyectos activos
             spec = spec.and(ProjectSpecifications.isPublic());
 
         } else if ("registered".equalsIgnoreCase(filters.type())) {
-            // TIPO REGISTERED: Proyectos donde el usuario es creador O colaborador
             spec = spec.and(ProjectSpecifications.hasUserRegistered(filters.userId()));
 
         } else if ("profile".equalsIgnoreCase(filters.type())) {
-            // TIPO PROFILE: Solo proyectos que el usuario creó
             spec = spec.and(ProjectSpecifications.hasUserCreator(filters.userId()));
         }
 
-        // Ejecutamos la query filtrada
         List<Project> projects = projectsRepository.findAll(spec);
 
-        // Transformamos al response (ajustado al formato del frontend)
         return projects.stream()
                 .map(p -> new ProjectBasicResponse(
                         p.getProjectId(),
@@ -115,50 +104,29 @@ public class ProjectService {
 
     public ProjectResponse getProjectById(Integer projectId) {
         try {
-            System.out.println("🔍 [1] Buscando proyecto ID: " + projectId);
-
             List<Project> projects = projectsRepository.findByProjectId(projectId);
             if (projects.isEmpty()) {
-                System.out.println("⚠️ [3] No hay proyectos");
-                return null; // ← Retorna null en lugar de lista vacía
+                System.out.println(" [3] No hay proyectos");
+                return null; 
             }
 
-            // Tomar solo el primer proyecto (debería ser único por ID)
             Project project = projects.get(0);
             System.out.println("✅ [4] Proyecto encontrado: " + project.getName());
 
-            // Convertir el proyecto único a ProjectResponse
             ProjectResponse response = convertToProjectResponse(project);
-            System.out.println("🚀 [8] Response único creado");
 
-            return response; // ← Retorna objeto único
+            return response;
 
         } catch (Exception e) {
-            System.err.println("❌ [ERROR] En getProjectById: " + e.getMessage());
+            System.err.println("[ERROR] En getProjectById: " + e.getMessage());
             e.printStackTrace();
-            return null; // ← Retorna null en caso de error
+            return null; 
         }
     }
 
     private ProjectResponse convertToProjectResponse(Project project) {
-        // Obtener las tareas de este proyecto específico
         Set<Task> tasks = taskJdbcRepository.findTasksByProjectId(project.getProjectId());
-        System.out.println("✅ [11] Tareas encontradas: " + tasks.size());
 
-        // Debug: Imprimir información de cada tarea
-        tasks.forEach(task -> {
-            System.out.println("  📌 Tarea: " + task.getName());
-            System.out.println("     Estado: " + task.getState());
-            if (task.getAssignedUser() != null) {
-                System.out.println("     Usuario: " + task.getAssignedUser().getName() + " "
-                        + task.getAssignedUser().getLastname());
-                System.out.println("     Email: " + task.getAssignedUser().getEmail());
-            } else {
-                System.out.println("     Usuario: SIN ASIGNAR");
-            }
-        });
-
-        // Convertir Set<Task> a Set<TaskBasicDTO>
         Set<TaskBasicDTO> taskDTOs = tasks.stream()
                 .map(task -> {
                     TaskBasicDTO dto = new TaskBasicDTO(
@@ -168,14 +136,9 @@ public class ProjectService {
                             task.getAssignedUser() != null ? task.getAssignedUser().getEmail() : "Sin email",
                             task.getAssignedUser() != null ? task.getAssignedUser().getName() : "Sin nombre",
                             task.getAssignedUser() != null ? task.getAssignedUser().getLastname() : "Sin apellido");
-                    System.out.println(
-                            "  🔄 DTO creado: ID=" + dto.taskId() + ", " + dto.name() + " - Email: " + dto.userEmail());
                     return dto;
                 })
                 .collect(Collectors.toSet());
-        System.out.println("✅ [12] TaskDTOs creados: " + taskDTOs.size());
-
-        // Convertir Set<Skill> a Set<SkillBasicDTO>
         Set<SkillBasicDTO> skillDTOs = new HashSet<>();
         if (project.getSkills() != null) {
             skillDTOs = project.getSkills().stream()
@@ -183,14 +146,11 @@ public class ProjectService {
                             skill.getName() != null ? skill.getName() : "Sin nombre"))
                     .collect(Collectors.toSet());
         }
-        System.out.println("✅ [13] SkillDTOs creados: " + skillDTOs.size());
-
-        // Crear y retornar el response único
         return new ProjectResponse(
                 project.getProjectId(),
                 project.getName(),
                 project.getDescription(),
-                project.getUsers(), // ← users vacío para evitar problemas de serialización
+                project.getUsers(),
                 getCategoryName(project.getCategory()),
                 skillDTOs,
                 taskDTOs);
@@ -198,68 +158,29 @@ public class ProjectService {
 
     @Transactional
     public CreateProjectResponse updateProject(UpdateProjectRequest request) {
-        System.out.println("🔄 [UPDATE] Iniciando actualización...");
-        System.out.println("📥 Request: projectId=" + request.projectId() +
-                ", title=" + request.title() +
-                ", description=" + request.description() +
-                ", categoryId=" + request.categoryId() +
-                ", skills count=" + (request.skills() != null ? request.skills().size() : 0));
-
         Project updatedProject = projectsRepository.findById(request.projectId()).orElse(null);
         if (updatedProject != null) {
-            System.out.println("✅ Proyecto encontrado. Datos actuales:");
-            System.out.println("   - name: " + updatedProject.getName());
-            System.out.println("   - description: " + updatedProject.getDescription());
-            System.out.println("   - category: " + (updatedProject.getCategory() != null
-                    ? updatedProject.getCategory().getCategoryId() + " - " + updatedProject.getCategory().getName()
-                    : "null"));
-            System.out.println("   - skills actuales: "
-                    + (updatedProject.getSkills() != null ? updatedProject.getSkills().size() : 0));
-
-            // 1. ACTUALIZAR CAMPOS BÁSICOS
-            System.out
-                    .println("🔄 Actualizando nombre: '" + updatedProject.getName() + "' → '" + request.title() + "'");
-            updatedProject.setName(request.title());
-
-            System.out.println("🔄 Actualizando descripción: '" + updatedProject.getDescription() + "' → '"
-                    + request.description() + "'");
-            updatedProject.setDescription(request.description());
-
-            // 2. ACTUALIZAR CATEGORÍA
             if (request.categoryId() != null) {
                 Category category = categoryRepository.findById(request.categoryId()).orElse(null);
-                String currentCategory = updatedProject.getCategory() != null
-                        ? updatedProject.getCategory().getCategoryId() + " - " + updatedProject.getCategory().getName()
-                        : "null";
-                String newCategory = category != null ? category.getCategoryId() + " - " + category.getName() : "null";
 
-                System.out.println("🔄 Actualizando categoría: " + currentCategory + " → " + newCategory);
                 updatedProject.setCategory(category);
             } else {
-                System.out.println("🔄 No se proporcionó categoryId, manteniendo categoría actual");
+                System.out.println("No se proporcionó categoryId, manteniendo categoría actual");
             }
 
-            // 3. ACTUALIZAR SKILLS
-            System.out.println("🔄 Actualizando skills...");
             if (request.skills() != null && !request.skills().isEmpty()) {
-                System.out.println("🔄 Procesando " + request.skills().size() + " skills...");
 
                 Set<Skill> managedSkills = new HashSet<>();
 
                 for (Skill requestSkill : request.skills()) {
-                    System.out.println("   - Procesando skill - ID: " + requestSkill.getSkillId() + ", Name: "
-                            + requestSkill.getName());
 
                     if (requestSkill.getSkillId() != null) {
                         Skill existingSkill = skillRepository.findById(requestSkill.getSkillId())
                                 .orElseThrow(() -> new IllegalArgumentException(
                                         "Skill no encontrado con ID: " + requestSkill.getSkillId()));
                         managedSkills.add(existingSkill);
-                        System.out.println("     ✅ Skill encontrado: " + existingSkill.getName() + " (ID: "
-                                + existingSkill.getSkillId() + ")");
                     } else {
                         if (requestSkill.getName() == null || requestSkill.getName().trim().isEmpty()) {
-                            System.out.println("     ⚠️  Skill sin ID ni nombre, saltando...");
                             continue;
                         }
                         Skill newSkill = new Skill();
@@ -270,7 +191,6 @@ public class ProjectService {
                     }
                 }
 
-                // Limpiar y asignar nuevos skills
                 if (updatedProject.getSkills() != null) {
                     updatedProject.getSkills().clear();
                 }

@@ -34,9 +34,6 @@ public class NotificationService {
                 .build();
     }
 
-    /**
-     * Obtiene todas las notificaciones de un usuario desde el microservicio
-     */
     public List<NotificationResponse> getNotificationsByUser(Long userId) {
         try {
             log.info("Obteniendo notificaciones para usuario: {}", userId);
@@ -75,9 +72,6 @@ public class NotificationService {
         }
     }
 
-    /**
-     * Marca una notificación como leída
-     */
     public CreateProjectResponse readNotification(NotificationUserRequest request) {
         try {
             log.info("Marcando notificación {} como leída para usuario {}", 
@@ -119,9 +113,6 @@ public class NotificationService {
         }
     }
 
-    /**
-     * Elimina una notificación
-     */
     public CreateProjectResponse deleteNotification(NotificationUserRequest request) {
         try {
             log.info("Eliminando notificación {} para usuario {}", 
@@ -163,16 +154,6 @@ public class NotificationService {
         }
     }
 
-    /**
-     * Crea una nueva notificación (SIN KAFKA)
-     * Este método llama directamente al endpoint POST del microservicio
-     * 
-     * @param userId ID del usuario que recibirá la notificación
-     * @param title Título de la notificación
-     * @param description Descripción detallada
-     * @param type Tipo: warning, success, informative, application
-     * @return Respuesta con éxito/error
-     */
     public CreateProjectResponse createNotification(
             Long userId, 
             String title, 
@@ -219,7 +200,6 @@ public class NotificationService {
         }
     }
 
-    // DTOs internos para mapear las respuestas del microservicio
     private record NotificationApiResponse(
             boolean success,
             String message,

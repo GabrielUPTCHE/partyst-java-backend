@@ -1,6 +1,5 @@
 package com.partyst.app.partystapp.entities;
 
-import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,8 +38,8 @@ public class Category {
     @JoinTable(
         name = "project_categories",
         schema = "partyst_plastic",
-        joinColumns = @JoinColumn(name = "categorie_id"),      // Category → category_id
-        inverseJoinColumns = @JoinColumn(name = "project_id")  // Project → project_id
+        joinColumns = @JoinColumn(name = "categorie_id"),
+        inverseJoinColumns = @JoinColumn(name = "project_id")
     )
     @JsonIgnore
     private Set<Project> projects;

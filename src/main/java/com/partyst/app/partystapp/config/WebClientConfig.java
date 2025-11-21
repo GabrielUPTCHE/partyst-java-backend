@@ -14,18 +14,11 @@ import reactor.netty.http.client.HttpClient;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Configuración global de WebClient para comunicación con microservicios
- */
 @Configuration
 public class WebClientConfig {
 
-    /**
-     * Bean de WebClient con configuraciones de timeout y buffer size optimizadas
-     */
     @Bean
     public WebClient.Builder webClientBuilder() {
-        // Configurar HttpClient con timeouts
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
                 .responseTimeout(Duration.ofSeconds(10))
@@ -33,11 +26,10 @@ public class WebClientConfig {
                         .addHandlerLast(new ReadTimeoutHandler(10, TimeUnit.SECONDS))
                         .addHandlerLast(new WriteTimeoutHandler(10, TimeUnit.SECONDS)));
 
-        // Configurar estrategias de exchange para permitir respuestas más grandes
         ExchangeStrategies strategies = ExchangeStrategies.builder()
                 .codecs(configurer -> configurer
                         .defaultCodecs()
-                        .maxInMemorySize(16 * 1024 * 1024)) // 16 MB buffer
+                        .maxInMemorySize(16 * 1024 * 1024))
                 .build();
 
         return WebClient.builder()

@@ -19,9 +19,7 @@ import com.partyst.app.partystapp.records.responses.ArtistFilterResponse;
 import com.partyst.app.partystapp.records.responses.ArtistProfileData;
 import com.partyst.app.partystapp.records.responses.ArtistProfileResponse;
 import com.partyst.app.partystapp.records.responses.CreateProjectResponse;
-import com.partyst.app.partystapp.records.responses.EditUserResponse;
 import com.partyst.app.partystapp.records.responses.ProjectFilterResponse;
-import com.partyst.app.partystapp.records.responses.ProjectResponse;
 import com.partyst.app.partystapp.records.responses.SkillResponse;
 import com.partyst.app.partystapp.records.responses.UserByIdResponse;
 import com.partyst.app.partystapp.repositories.SkillRepository;
@@ -64,24 +62,14 @@ public class UserService {
 
     public ArtistProfileResponse getArtistProfile(Long userId) {
         try {
-            System.out.println("🔍 Buscando usuario con ID: " + userId);
             User user = userRepository.getReferenceById(userId);
             if (user == null) {
                 return new ArtistProfileResponse(false, "Usuario no encontrado", null);
             }
-            System.out.println("🔍 User encontrado: " + user.getUserId());
-            System.out.println("🔍 Name: " + user.getName());
-            System.out.println("🔍 Lastname: " + user.getLastname());
-            System.out.println("🔍 Nickname: " + user.getNickname());
-            System.out.println("🔍 Email: " + user.getEmail());
-            System.out.println("🔍 Biography: " + user.getBiography()); // <-- Esto es lo importante
-            System.out.println("🔍 Biography es null? " + (user.getBiography() == null));
-            // Obtener proyectos del usuario (como colaborador o creador)
             List<ProjectFilterResponse> projects = user.getProjects().stream()
                     .map(this::mapToProjectResponse)
                     .collect(Collectors.toList());
 
-            // Mapear skills
             List<SkillResponse> skills = user.getSkills().stream()
                     .map(skill -> new SkillResponse(skill.getName()))
                     .collect(Collectors.toList());
@@ -106,29 +94,24 @@ public class UserService {
         try {
             List<User> allUsers = userRepository.findAll();
 
-            // Filtrar usuarios por nickname (si se proporciona)
             List<User> filteredUsers = allUsers.stream()
                     .filter(user -> request.nickname() == null || request.nickname().isEmpty() ||
                             user.getNickname().toLowerCase().contains(request.nickname().toLowerCase()))
                     .filter(user -> {
-                        // Filtrar por habilidades si se proporcionan
                         if (request.skills() == null || request.skills().isEmpty()) {
                             return true;
                         }
 
-                        // Obtener nombres de habilidades del usuario
                         List<String> userSkillNames = user.getSkills().stream()
                                 .map(Skill::getName)
                                 .map(String::toLowerCase)
                                 .collect(Collectors.toList());
 
-                        // Verificar si el usuario tiene al menos una de las habilidades solicitadas
                         return request.skills().stream()
                                 .anyMatch(requestSkill -> userSkillNames.contains(requestSkill.name().toLowerCase()));
                     })
                     .collect(Collectors.toList());
 
-            // Mapear a ArtistData
             List<ArtistData> artists = filteredUsers.stream()
                     .map(this::mapToArtistData)
                     .collect(Collectors.toList());
@@ -141,12 +124,10 @@ public class UserService {
     }
 
     private ArtistData mapToArtistData(User user) {
-        // Mapear skills
         List<SkillResponse> skills = user.getSkills().stream()
                 .map(skill -> new SkillResponse(skill.getName()))
                 .collect(Collectors.toList());
 
-        // Crear biografía básica
         String biography = user.getNickname() + " es un artista con experiencia en " +
                 skills.stream().map(SkillResponse::name).collect(Collectors.joining(", "));
 
@@ -164,12 +145,9 @@ public class UserService {
         findedUser.setCellphone(request.cellphone());
         findedUser.setNickname(request.nickname());
         findedUser.setBiography(request.biography());
-        System.out.println(request.skillIds().toString()+"----------------------");
         if (request.skillIds() != null && !request.skillIds().isEmpty()) {
 
             List<Skill> skills = skillRepository.findBySkillIdIn(request.skillIds());
-
-            System.out.println("🔍 Skills encontradas: " + skills.size() + " ::: "+ skills.get(0).getName());
 
             Set<Skill> skillSet = new HashSet<>(skills);
             findedUser.setSkills(skillSet);
@@ -187,7 +165,7 @@ public class UserService {
     }
 
     private ProjectFilterResponse mapToProjectResponse(Project project) {
-        // Mapear skills del proyecto
+        
         List<SkillResponse> projectSkills = project.getSkills().stream()
                 .map(skill -> new SkillResponse(skill.getName()))
                 .collect(Collectors.toList());

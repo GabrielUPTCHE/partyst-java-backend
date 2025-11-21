@@ -23,13 +23,11 @@ public class RedisQueueService {
     public void init() {
         try {
             redisTemplate.opsForStream().createGroup(
-                STREAM_KEY,
-                ReadOffset.from("0"),
-                GROUP
-            );
-            System.out.println("➡️ Grupo creado: retry-group");
+                    STREAM_KEY,
+                    ReadOffset.from("0"),
+                    GROUP);
         } catch (Exception e) {
-            System.out.println("ℹ️ Grupo ya existe: retry-group");
+            System.out.println("ℹGrupo ya existe: retry-group");
         }
     }
 
@@ -40,19 +38,14 @@ public class RedisQueueService {
         redisTemplate.opsForStream().add(
                 StreamRecords.newRecord()
                         .in(STREAM_KEY)
-                        .ofMap(map)
-        );
-
-        System.out.println("📥 Operación encolada en Redis.");
+                        .ofMap(map));
     }
 
-    /** 🔥 versión correcta de lectura de PENDING */
     public List<MapRecord<String, Object, Object>> readPending() {
         return redisTemplate.opsForStream().read(
                 Consumer.from(GROUP, "worker-1"),
                 StreamReadOptions.empty().count(10),
-                StreamOffset.create(STREAM_KEY, ReadOffset.from("0"))
-        );
+                StreamOffset.create(STREAM_KEY, ReadOffset.from("0")));
     }
 
     public void ackRecord(String id) {

@@ -10,6 +10,7 @@ import com.partyst.app.partystapp.records.GenericResponse;
 import com.partyst.app.partystapp.records.requests.ForgetPasswordRequest;
 import com.partyst.app.partystapp.records.requests.LoginRequest;
 import com.partyst.app.partystapp.records.requests.RegisterRequest;
+import com.partyst.app.partystapp.records.requests.ResetPasswordRequest;
 import com.partyst.app.partystapp.records.requests.ValidateCodePasswordRequest;
 import com.partyst.app.partystapp.records.responses.ForgetPasswordResponse;
 import com.partyst.app.partystapp.records.responses.TokenResponse;
@@ -68,7 +69,11 @@ public class AuthController {
         return ResponseEntity.ok(validateCodePassword);
     }
     
-    
+    @PostMapping("/resetPassword")
+    public ResponseEntity<GenericResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
+        GenericResponse<Boolean> resetResponse = authService.resetPassword(request);
+        return ResponseEntity.ok(resetResponse);
+    }
     
 
 }

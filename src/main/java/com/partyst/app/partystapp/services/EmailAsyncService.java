@@ -17,7 +17,7 @@ public class EmailAsyncService {
         try {
             Object result = microEmailClient.sendEmail(email, code);
         } catch (Exception ex) {
-            System.out.println("ERROR al enviar email ❌: " + ex.getMessage());
+            System.out.println("ERROR al enviar email : " + ex.getMessage());
             ex.printStackTrace();
         }
     }
